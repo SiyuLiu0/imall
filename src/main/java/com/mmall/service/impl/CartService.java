@@ -68,16 +68,20 @@ public class CartService implements ICartService {
         return ServerResponse.createBySuccess(cartVo);
     }
 
-    public ServerResponse<CartVo> deleteProduct(Integer userId,String productIds){
+    public ServerResponse<CartVo>  deleteProduct(Integer userId, String productIds){
         List<String> productList = Splitter.on(",").splitToList(productIds);
         if(CollectionUtils.isEmpty(productList)){
             return ServerResponse.createByErrorCodeMsg(ResponseCode.ILLEGAL_ARGUMENT.getCode(),ResponseCode.ILLEGAL_ARGUMENT.getDescription());
         }
-        cartMapper.deleteByUserIdProductIds(userId,productList);
+        cartMapper.deleteByUserIdProductIds(userId, productList);
         CartVo cartVo = this.getCartVoLimit(userId);
         return ServerResponse.createBySuccess(cartVo);
     }
 
+    public ServerResponse<CartVo> list(Integer userId){
+        CartVo cartVo = this.getCartVoLimit(userId);
+        return ServerResponse.createBySuccess(cartVo);
+    }
 
     private CartVo getCartVoLimit(Integer userId){
         CartVo cartVo = new CartVo();
@@ -138,5 +142,17 @@ public class CartService implements ICartService {
             return false;
         }
         return cartMapper.selectCartProductCheckedStatusByUserId(userId) == 0;
+    }
+
+    public ServerResponse<CartVo> selectOrUnSelect (Integer userId,Integer productId,Integer checked){
+        cartMapper.checkedOrUncheckedProduct(userId,productId,checked);
+        return this.list(userId);
+    }
+
+    public ServerResponse<Integer> getCartProductCount(Integer userId){
+        if(userId == null){
+            return ServerResponse.createBySuccess(0);
+        }
+        return ServerResponse.createBySuccess(cartMapper.selectCartProductCount(userId));
     }
 }
