@@ -62,13 +62,13 @@ public class UserService implements IUserService {
         if(StringUtils.isNotBlank(type)){
             if(Const.USERNAME.equals(type)){
                 int resultCount = userMapper.checkUsername(str);
-                if(resultCount == 0){
+                if(resultCount > 0){
                     return ServerResponse.createByErrorMsg("The username already exists.");
                 }
             }
             if(Const.String_EMAIL.equals(type)){
                 int resultCount = userMapper.checkEmail(str);
-                if(resultCount == 0){
+                if(resultCount > 0){
                     return ServerResponse.createByErrorMsg("The email already exists.");
                 }
             }
@@ -142,7 +142,7 @@ public class UserService implements IUserService {
     public ServerResponse<User> updateInformation(User user){
         //cannot update username
         //check email
-        int resultCount = userMapper.checkEmailByUserID(user.getEmail(), user.getId());
+        int resultCount = userMapper.checkEmailByUserId(user.getEmail(), user.getId());
         if(resultCount > 0){
             return ServerResponse.createByErrorMsg("Email is already used by another user!");
         }
@@ -168,4 +168,12 @@ public class UserService implements IUserService {
         user.setPassword(StringUtils.EMPTY);
         return ServerResponse.createBySuccess(user);
     }
+
+    public ServerResponse checkAdminRole(User user){
+        if(user != null && user.getRole().intValue() == Const.Role.ROLE_ADMIN){
+            return ServerResponse.createBySuccess();
+        }
+        return ServerResponse.createByError();
+    }
+
 }
